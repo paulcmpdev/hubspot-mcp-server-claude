@@ -12,6 +12,7 @@ import { registerContactTools } from './contacts.js';
 import { registerCompanyTools } from './companies.js';
 import { registerDealTools } from './deals.js';
 import { registerLineItemTools } from './line-items.js';
+import { registerProductTools } from './products.js';
 import { registerFileTools } from './files.js';
 import { registerMetaTools } from './meta.js';
 
@@ -50,6 +51,11 @@ export const ALL_TOOL_NAMES = [
   'hubspot_get_line_item',
   'hubspot_create_line_item',
   'hubspot_update_line_item',
+  // Products (catalog used by line items)
+  'hubspot_search_products',
+  'hubspot_get_product',
+  'hubspot_create_product',
+  'hubspot_update_product',
   // Files (File Manager — separate API surface from CRM)
   'hubspot_search_files',
   'hubspot_get_file',
@@ -66,6 +72,7 @@ export function registerAllTools(server: McpServer): void {
   registerCompanyTools(server);
   registerDealTools(server);
   registerLineItemTools(server);
+  registerProductTools(server);
   registerFileTools(server);
   registerMetaTools(server);
 }

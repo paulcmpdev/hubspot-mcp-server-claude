@@ -14,7 +14,7 @@ This server exposes **read, create, and update** operations only. It will **neve
 
 ## Tools
 
-34 tools across 7 areas.
+38 tools across 8 areas.
 
 ### Engagements (the unblocking goal)
 
@@ -33,9 +33,9 @@ This server exposes **read, create, and update** operations only. It will **neve
 | `hubspot_search_emails` | Read |
 | `hubspot_get_email` | Read |
 
-### Contacts / Companies / Deals / Line Items
+### Contacts / Companies / Deals / Line Items / Products
 
-For each: `hubspot_search_*`, `hubspot_get_*`, `hubspot_create_*`, `hubspot_update_*`. Line items are typically created with an `associations` arg pointing at a parent deal/quote/invoice.
+For each: `hubspot_search_*`, `hubspot_get_*`, `hubspot_create_*`, `hubspot_update_*`. Line items are typically created with an `associations` arg pointing at a parent deal/quote/invoice. Products are entries in the Products Library used to populate line items.
 
 ### Files (File Manager — separate `/files/v3` API)
 
@@ -175,6 +175,7 @@ src/
     companies.ts      – company CRUD-minus-D
     deals.ts          – deal CRUD-minus-D
     line-items.ts     – line item CRUD-minus-D
+    products.ts       – product CRUD-minus-D
     files.ts          – File Manager: search, get, signed URL, URL import
     meta.ts           – describe_object, list_owners
     index.ts          – aggregate registration
