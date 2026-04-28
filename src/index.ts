@@ -210,7 +210,7 @@ function cryptoRandomId(): string {
 function start(): void {
   validateEnv();
 
-  const port = parseInt(process.env.PORT ?? '3000', 10);
+  const port = parseInt(process.env.PORT ?? '3100', 10);
   const app = buildApp();
   const httpServer = app.listen(port, () => {
     logger.info(

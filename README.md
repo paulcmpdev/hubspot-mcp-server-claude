@@ -88,7 +88,7 @@ Optional:
 | Variable | Default | Purpose |
 |---|---|---|
 | `MCP_API_KEY` | _(unset)_ | Static Bearer key accepted alongside OAuth JWTs — debug/curl fallback |
-| `PORT` | `3000` | HTTP port |
+| `PORT` | `3100` | HTTP port (chosen to not conflict with the Printavo MCP server, which defaults to 3000) |
 | `ALLOWED_ORIGINS` | `*` | Comma-separated CORS origins |
 | `LOG_LEVEL` | `info` | Pino log level |
 | `NODE_ENV` | `development` | `production` switches Pino to JSON |
