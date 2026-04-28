@@ -14,7 +14,7 @@ This server exposes **read, create, and update** operations only. It will **neve
 
 ## Tools
 
-26 tools across 5 areas.
+34 tools across 7 areas.
 
 ### Engagements (the unblocking goal)
 
@@ -33,9 +33,20 @@ This server exposes **read, create, and update** operations only. It will **neve
 | `hubspot_search_emails` | Read |
 | `hubspot_get_email` | Read |
 
-### Contacts / Companies / Deals
+### Contacts / Companies / Deals / Line Items
 
-For each: `hubspot_search_*`, `hubspot_get_*`, `hubspot_create_*`, `hubspot_update_*`.
+For each: `hubspot_search_*`, `hubspot_get_*`, `hubspot_create_*`, `hubspot_update_*`. Line items are typically created with an `associations` arg pointing at a parent deal/quote/invoice.
+
+### Files (File Manager — separate `/files/v3` API)
+
+| Tool | Purpose |
+|---|---|
+| `hubspot_search_files` | List/search the File Manager. |
+| `hubspot_get_file` | Fetch metadata for one file. |
+| `hubspot_get_file_signed_url` | Mint a short-lived download URL (required for PRIVATE files). |
+| `hubspot_upload_file_from_url` | Async import: HubSpot fetches a public URL and stores it. JSON-only — multipart binary upload is not supported by this server (use HubSpot's `POST /files/v3/files` directly for that). |
+
+Files require the `files` scope on your Private App (separate from CRM scopes).
 
 ### Meta
 
@@ -61,6 +72,7 @@ Read + write across:
 - `sales-email-read` (for engagement emails)
 - `crm.lists`, `crm.objects.owners`
 - Read on `crm.schemas.*` for the object types you care about
+- `files` (read + write) — required for the four `hubspot_*_file*` tools. If you skip this scope, the file tools return 403; everything else still works.
 
 No delete scopes are required — this server never issues DELETE requests.
 
@@ -162,6 +174,8 @@ src/
     contacts.ts       – contact CRUD-minus-D
     companies.ts      – company CRUD-minus-D
     deals.ts          – deal CRUD-minus-D
+    line-items.ts     – line item CRUD-minus-D
+    files.ts          – File Manager: search, get, signed URL, URL import
     meta.ts           – describe_object, list_owners
     index.ts          – aggregate registration
 tests/                – vitest suites

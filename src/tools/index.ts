@@ -11,6 +11,8 @@ import { registerEngagementTools } from './engagements.js';
 import { registerContactTools } from './contacts.js';
 import { registerCompanyTools } from './companies.js';
 import { registerDealTools } from './deals.js';
+import { registerLineItemTools } from './line-items.js';
+import { registerFileTools } from './files.js';
 import { registerMetaTools } from './meta.js';
 
 /** Names of every registered tool. Used for the health-check / logs. */
@@ -43,6 +45,16 @@ export const ALL_TOOL_NAMES = [
   'hubspot_get_deal',
   'hubspot_create_deal',
   'hubspot_update_deal',
+  // Line items
+  'hubspot_search_line_items',
+  'hubspot_get_line_item',
+  'hubspot_create_line_item',
+  'hubspot_update_line_item',
+  // Files (File Manager — separate API surface from CRM)
+  'hubspot_search_files',
+  'hubspot_get_file',
+  'hubspot_get_file_signed_url',
+  'hubspot_upload_file_from_url',
   // Meta
   'hubspot_describe_object',
   'hubspot_list_owners',
@@ -53,5 +65,7 @@ export function registerAllTools(server: McpServer): void {
   registerContactTools(server);
   registerCompanyTools(server);
   registerDealTools(server);
+  registerLineItemTools(server);
+  registerFileTools(server);
   registerMetaTools(server);
 }

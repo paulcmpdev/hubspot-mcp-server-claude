@@ -119,3 +119,40 @@ export type ObjectType =
   | 'line_items'
   | 'products'
   | 'quotes';
+
+/**
+ * A file from HubSpot's File Manager (/files/v3/files).
+ * Note: this is NOT a CRM v3 object — it has a different shape (no properties bag).
+ */
+export interface HubSpotFile {
+  id: string;
+  name?: string;
+  type?: string;
+  extension?: string;
+  encoding?: string;
+  size?: number;
+  url?: string;
+  path?: string;
+  parentFolderId?: string | null;
+  isUsableInContent?: boolean;
+  access?: 'PUBLIC_INDEXABLE' | 'PUBLIC_NOT_INDEXABLE' | 'PRIVATE' | 'HIDDEN_INDEXABLE' | 'HIDDEN_NOT_INDEXABLE' | string;
+  archived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  defaultHostingUrl?: string;
+}
+
+/** Response from the async URL-import endpoint. */
+export interface HubSpotFileImportTask {
+  id: string;
+  status: 'PENDING' | 'PROCESSING' | 'CANCELED' | 'COMPLETE' | string;
+  errors?: Array<{ message: string }>;
+  result?: HubSpotFile;
+}
+
+/** Response from the signed-url endpoint. */
+export interface HubSpotFileSignedUrl {
+  url: string;
+  expiresAt?: string;
+  size?: { width?: number; height?: number };
+}

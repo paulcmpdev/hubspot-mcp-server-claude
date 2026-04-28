@@ -6,7 +6,14 @@
  */
 
 import { CHARACTER_LIMIT } from '../constants.js';
-import type { HubSpotObject, HubSpotOwner, HubSpotProperty } from '../types.js';
+import type {
+  HubSpotFile,
+  HubSpotFileImportTask,
+  HubSpotFileSignedUrl,
+  HubSpotObject,
+  HubSpotOwner,
+  HubSpotProperty,
+} from '../types.js';
 
 /** Truncate a string to CHARACTER_LIMIT, appending an indicator. */
 export function truncate(text: string, limit: number = CHARACTER_LIMIT): string {
@@ -97,6 +104,83 @@ export function formatOwner(owner: HubSpotOwner): string {
     owner.archived ? `- **archived**: true` : null,
   ].filter(Boolean);
   return parts.join('\n');
+}
+
+/** Render a single file from File Manager. */
+export function formatFile(file: HubSpotFile): string {
+  const lines = [
+    `- **id**: ${file.id}`,
+    file.name ? `- **name**: ${file.name}` : null,
+    file.extension ? `- **extension**: ${file.extension}` : null,
+    file.size !== undefined ? `- **size**: ${file.size.toLocaleString()} bytes` : null,
+    file.type ? `- **type**: ${file.type}` : null,
+    file.access ? `- **access**: ${file.access}` : null,
+    file.path ? `- **path**: ${file.path}` : null,
+    file.url ? `- **url**: ${file.url}` : null,
+    file.defaultHostingUrl && file.defaultHostingUrl !== file.url
+      ? `- **defaultHostingUrl**: ${file.defaultHostingUrl}`
+      : null,
+    file.parentFolderId ? `- **parentFolderId**: ${file.parentFolderId}` : null,
+    file.archived ? `- **archived**: true` : null,
+    file.createdAt ? `- **createdAt**: ${file.createdAt}` : null,
+    file.updatedAt ? `- **updatedAt**: ${file.updatedAt}` : null,
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+
+/** Render a list of files as a markdown table. */
+export function formatFileList(files: HubSpotFile[], opts: { title: string; total?: number }): string {
+  if (files.length === 0) return `## ${opts.title}\n\n_No results._`;
+  const total = opts.total ?? files.length;
+  const rows = files.map(
+    (f) =>
+      `| ${f.id} | ${(f.name ?? '—').replace(/\|/g, '\\|')} | ${f.extension ?? '—'} | ${
+        f.size !== undefined ? f.size.toLocaleString() : '—'
+      } | ${f.access ?? '—'} |`,
+  );
+  return [
+    `## ${opts.title}`,
+    '',
+    `_Showing ${files.length} of ${total}._`,
+    '',
+    '| id | name | ext | size | access |',
+    '| --- | --- | --- | --- | --- |',
+    ...rows,
+  ].join('\n');
+}
+
+/** Render a signed-URL response. */
+export function formatSignedUrl(signed: HubSpotFileSignedUrl, fileId: string): string {
+  const lines = [
+    `## Signed download URL for file \`${fileId}\``,
+    '',
+    `**URL**: ${signed.url}`,
+  ];
+  if (signed.expiresAt) lines.push(`**Expires**: ${signed.expiresAt}`);
+  if (signed.size) {
+    const w = signed.size.width;
+    const h = signed.size.height;
+    if (w || h) lines.push(`**Image size**: ${w ?? '?'}×${h ?? '?'}`);
+  }
+  return lines.join('\n');
+}
+
+/** Render an async URL-import task response. */
+export function formatImportTask(task: HubSpotFileImportTask): string {
+  const lines = [
+    `## File import task`,
+    '',
+    `- **task id**: ${task.id}`,
+    `- **status**: ${task.status}`,
+  ];
+  if (task.result) {
+    lines.push('', '### Imported file', '', formatFile(task.result));
+  }
+  if (task.errors && task.errors.length > 0) {
+    lines.push('', '### Errors');
+    for (const e of task.errors) lines.push(`- ${e.message}`);
+  }
+  return lines.join('\n');
 }
 
 /** Render a property definition for `describe_object`. */
