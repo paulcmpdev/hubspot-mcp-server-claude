@@ -15,6 +15,10 @@ import { registerLineItemTools } from './line-items.js';
 import { registerProductTools } from './products.js';
 import { registerFileTools } from './files.js';
 import { registerMetaTools } from './meta.js';
+import { registerSalesAnalyticsTools } from './analytics-sales.js';
+import { registerMarketingAnalyticsTools } from './analytics-marketing.js';
+import { registerWebAnalyticsTools } from './analytics-web.js';
+import { registerEventAnalyticsTools } from './analytics-events.js';
 
 /** Names of every registered tool. Used for the health-check / logs. */
 export const ALL_TOOL_NAMES = [
@@ -64,6 +68,29 @@ export const ALL_TOOL_NAMES = [
   // Meta
   'hubspot_describe_object',
   'hubspot_list_owners',
+  // Analytics — sales & pipeline
+  'hubspot_get_pipeline_summary',
+  'hubspot_get_deal_velocity',
+  'hubspot_get_win_rate',
+  'hubspot_get_owner_activity',
+  'hubspot_get_deal_attribution',
+  // Analytics — email & marketing campaigns
+  'hubspot_list_email_campaigns',
+  'hubspot_get_email_campaign_stats',
+  'hubspot_aggregate_email_stats',
+  'hubspot_list_marketing_campaigns',
+  'hubspot_get_marketing_campaign_metrics',
+  'hubspot_get_top_campaigns_by_revenue',
+  // Analytics — forms & web
+  'hubspot_list_forms',
+  'hubspot_get_form_submissions',
+  'hubspot_get_traffic_summary',
+  'hubspot_get_top_pages',
+  // Analytics — events & sequences
+  'hubspot_list_event_types',
+  'hubspot_query_events',
+  'hubspot_list_sequences',
+  'hubspot_get_sequence_stats',
 ] as const;
 
 export function registerAllTools(server: McpServer): void {
@@ -75,4 +102,8 @@ export function registerAllTools(server: McpServer): void {
   registerProductTools(server);
   registerFileTools(server);
   registerMetaTools(server);
+  registerSalesAnalyticsTools(server);
+  registerMarketingAnalyticsTools(server);
+  registerWebAnalyticsTools(server);
+  registerEventAnalyticsTools(server);
 }

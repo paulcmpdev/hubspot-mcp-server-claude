@@ -156,3 +156,157 @@ export interface HubSpotFileSignedUrl {
   expiresAt?: string;
   size?: { width?: number; height?: number };
 }
+
+// ---------------------------------------------------------------------------
+// Analytics — pipelines, marketing, forms, events, sequences
+// ---------------------------------------------------------------------------
+
+/** A pipeline stage from /crm/v3/pipelines/{objectType}/{pipelineId} */
+export interface PipelineStage {
+  id: string;
+  label: string;
+  displayOrder: number;
+  metadata?: { isClosed?: string | boolean; probability?: string | number };
+  archived?: boolean;
+}
+
+export interface Pipeline {
+  id: string;
+  label: string;
+  displayOrder: number;
+  stages: PipelineStage[];
+  archived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Marketing email summary from /marketing/v3/emails */
+export interface HubSpotMarketingEmail {
+  id: string;
+  name?: string;
+  subject?: string;
+  state?: string; // DRAFT, PUBLISHED, etc.
+  type?: string;
+  publishDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  stats?: HubSpotEmailStatistics;
+}
+
+/** Email statistics aggregate. Shape matches /marketing/v3/emails/statistics responses. */
+export interface HubSpotEmailStatistics {
+  counters?: {
+    sent?: number;
+    delivered?: number;
+    open?: number;
+    click?: number;
+    bounce?: number;
+    unsubscribed?: number;
+    spamreport?: number;
+    reply?: number;
+  };
+  ratios?: {
+    deliveredratio?: number;
+    openratio?: number;
+    clickratio?: number;
+    bounceratio?: number;
+    unsubscribedratio?: number;
+  };
+  qualifierStats?: Record<string, number>;
+}
+
+/** Marketing campaign from /marketing/v3/campaigns */
+export interface HubSpotMarketingCampaign {
+  id: string;
+  properties?: {
+    hs_name?: string;
+    hs_start_date?: string;
+    hs_end_date?: string;
+    hs_goal?: string;
+    hs_budget_total?: number;
+    hs_currency_code?: string;
+    hs_owner?: string;
+    hs_color_hex?: string;
+    [key: string]: unknown;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Marketing campaign metrics (revenue, contacts, etc.). */
+export interface HubSpotCampaignMetrics {
+  campaignId: string;
+  metrics?: {
+    influenced?: { revenue?: number; contacts?: number };
+    sessions?: { total?: number };
+    contacts?: { firstTouch?: number; lastTouch?: number; influenced?: number };
+    revenue?: { firstTouch?: number; lastTouch?: number; influenced?: number };
+    [key: string]: unknown;
+  };
+}
+
+/** A marketing form from /marketing/v3/forms */
+export interface HubSpotForm {
+  id: string;
+  name?: string;
+  formType?: string;
+  archived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  fieldGroups?: unknown;
+  configuration?: unknown;
+  displayOptions?: unknown;
+}
+
+/** A form submission. */
+export interface HubSpotFormSubmission {
+  conversionId?: string;
+  submittedAt?: number; // ms epoch
+  values?: Array<{ name: string; value: string; objectTypeId?: string }>;
+  pageUrl?: string;
+  pageTitle?: string;
+}
+
+/** Custom event definition from /events/v3/event-definitions */
+export interface HubSpotEventDefinition {
+  name: string;
+  fullyQualifiedName?: string;
+  label?: string;
+  description?: string;
+  primaryObject?: string;
+  archived?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  properties?: Array<{ name: string; label: string; type: string }>;
+}
+
+/** A custom event occurrence. */
+export interface HubSpotEvent {
+  occurredAt?: string;
+  eventType?: string;
+  objectId?: string | number;
+  objectType?: string;
+  properties?: Record<string, unknown>;
+}
+
+/** Sequence summary (where exposed). */
+export interface HubSpotSequence {
+  id: string;
+  name?: string;
+  enrolledContactsCount?: number;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Web analytics report bucket. */
+export interface AnalyticsBucket {
+  breakdown?: string;
+  visits?: number;
+  visitors?: number;
+  pageviews?: number;
+  bounces?: number;
+  contactsConverted?: number;
+  rawViews?: number;
+  [key: string]: unknown;
+}

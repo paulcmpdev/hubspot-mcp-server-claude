@@ -14,7 +14,7 @@ This server exposes **read, create, and update** operations only. It will **neve
 
 ## Tools
 
-38 tools across 8 areas.
+57 tools across 12 areas.
 
 ### Engagements (the unblocking goal)
 
@@ -55,6 +55,54 @@ Files require the `files` scope on your Private App (separate from CRM scopes).
 | `hubspot_describe_object` | List property definitions for any object type. **Run this first** when working with unfamiliar objects — it tells the model exact property names, types, and dropdown options. |
 | `hubspot_list_owners` | Enumerate owners for `hubspot_owner_id` assignment. |
 
+### Analytics — Sales & Pipeline (5 tools)
+
+Roll up over the existing CRM search APIs. No new scopes required.
+
+| Tool | Answers |
+|---|---|
+| `hubspot_get_pipeline_summary` | Open deals by stage with weighted value. |
+| `hubspot_get_deal_velocity` | Avg/median/p90 days to close in a window. |
+| `hubspot_get_win_rate` | Win rate, optionally segmented by source/owner/etc. |
+| `hubspot_get_owner_activity` | Engagement counts (calls/emails/meetings/notes/tasks) per owner. |
+| `hubspot_get_deal_attribution` | Source, first/last touch, originating campaign for one deal. |
+
+### Analytics — Email & Marketing Campaigns (6 tools)
+
+Marketing Hub Pro+. Uses `/marketing/v3/emails` and `/marketing/v3/campaigns`.
+
+| Tool | Answers |
+|---|---|
+| `hubspot_list_email_campaigns` | List marketing emails. |
+| `hubspot_get_email_campaign_stats` | Sends/opens/clicks/bounces for one email. |
+| `hubspot_aggregate_email_stats` | Aggregate stats across emails in a window. |
+| `hubspot_list_marketing_campaigns` | List campaigns. |
+| `hubspot_get_marketing_campaign_metrics` | Revenue/contacts/sessions for one campaign. |
+| `hubspot_get_top_campaigns_by_revenue` | Top N campaigns by influenced/first-/last-touch revenue. |
+
+### Analytics — Forms & Web (4 tools)
+
+Requires `forms` scope and the legacy `/analytics/v2/...` web reports (works on Enterprise).
+
+| Tool | Answers |
+|---|---|
+| `hubspot_list_forms` | List forms. |
+| `hubspot_get_form_submissions` | Submissions for one form. |
+| `hubspot_get_traffic_summary` | Sessions/visitors/contacts by traffic source. |
+| `hubspot_get_top_pages` | Top pages by views in a window. |
+
+### Analytics — Behavioral Events & Sequences (4 tools)
+
+Behavioral events: Marketing Hub Enterprise + `behavioral_events.event_definitions.read_write` scope.
+Sequences: Sales Hub Enterprise.
+
+| Tool | Answers |
+|---|---|
+| `hubspot_list_event_types` | What custom events do we track? |
+| `hubspot_query_events` | Occurrences of a custom event in a window. |
+| `hubspot_list_sequences` | What sales sequences are running? |
+| `hubspot_get_sequence_stats` | Reply/meeting rates for a sequence. |
+
 All tools support `response_format: "markdown" | "json"`.
 
 ## Setup
@@ -73,6 +121,10 @@ Read + write across:
 - `crm.lists`, `crm.objects.owners`
 - Read on `crm.schemas.*` for the object types you care about
 - `files` (read + write) — required for the four `hubspot_*_file*` tools. If you skip this scope, the file tools return 403; everything else still works.
+- `forms` (read) — required for `hubspot_list_forms` and `hubspot_get_form_submissions`.
+- `marketing-email` and `marketing.campaigns.read` — required for the six email/campaign analytics tools (Marketing Hub Pro+).
+- `behavioral_events.event_definitions.read_write` — required for `hubspot_list_event_types` and `hubspot_query_events` (Marketing Hub Enterprise).
+- `sales-email-read` already covers most sequence reads; if `hubspot_list_sequences` returns a scope error, your portal needs the `automation` scope too.
 
 No delete scopes are required — this server never issues DELETE requests.
 
@@ -178,6 +230,10 @@ src/
     products.ts       – product CRUD-minus-D
     files.ts          – File Manager: search, get, signed URL, URL import
     meta.ts           – describe_object, list_owners
+    analytics-sales.ts     – pipeline, velocity, win rate, owner activity, attribution
+    analytics-marketing.ts – email + marketing campaign stats
+    analytics-web.ts       – forms + legacy /analytics/v2 web reports
+    analytics-events.ts    – behavioral events + sales sequences
     index.ts          – aggregate registration
 tests/                – vitest suites
 ```
