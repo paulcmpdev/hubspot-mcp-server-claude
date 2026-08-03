@@ -14,6 +14,7 @@ import { hubspotRequest } from '../services/hubspot-client.js';
 import { truncate } from '../services/formatters.js';
 import { ResponseFormat } from '../schemas/common.js';
 import { toolError, toolResult } from './_helpers.js';
+import { registerGoalFamilyCreateTools } from './goal-family-create.js';
 import {
   registerGetTool,
   registerSearchTool,
@@ -450,4 +451,6 @@ export function registerGoalTools(server: McpServer): void {
       }
     },
   );
+
+  registerGoalFamilyCreateTools(server);
 }

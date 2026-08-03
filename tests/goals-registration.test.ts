@@ -3,7 +3,7 @@ import { ALL_TOOL_NAMES } from '../src/tools/index.js';
 import { registerGoalTools } from '../src/tools/goals.js';
 
 describe('goal tool registration', () => {
-  it('registers all four goal tools on the MCP server', () => {
+  it('registers all six goal tools on the MCP server', () => {
     const registerTool = vi.fn();
     registerGoalTools({ registerTool } as never);
 
@@ -12,6 +12,8 @@ describe('goal tool registration', () => {
       'hubspot_get_goal',
       'hubspot_preview_goal_updates',
       'hubspot_batch_update_goals',
+      'hubspot_preview_goal_family_create',
+      'hubspot_create_goal_family',
     ]);
   });
 
@@ -30,6 +32,33 @@ describe('goal tool registration', () => {
     );
   });
 
+  it('marks the family creator as a non-idempotent external mutation', () => {
+    const registerTool = vi.fn();
+    registerGoalTools({ registerTool } as never);
+
+    const previewCall = registerTool.mock.calls.find(
+      (call) => call[0] === 'hubspot_preview_goal_family_create',
+    );
+    expect(previewCall?.[1].annotations).toEqual(
+      expect.objectContaining({
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+      }),
+    );
+
+    const createCall = registerTool.mock.calls.find(
+      (call) => call[0] === 'hubspot_create_goal_family',
+    );
+    expect(createCall?.[1].annotations).toEqual(
+      expect.objectContaining({
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+      }),
+    );
+  });
+
   it('advertises goal tools in server health and discovery metadata', () => {
     expect(ALL_TOOL_NAMES).toEqual(
       expect.arrayContaining([
@@ -37,6 +66,8 @@ describe('goal tool registration', () => {
         'hubspot_get_goal',
         'hubspot_preview_goal_updates',
         'hubspot_batch_update_goals',
+        'hubspot_preview_goal_family_create',
+        'hubspot_create_goal_family',
       ]),
     );
   });

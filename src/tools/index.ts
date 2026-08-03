@@ -66,6 +66,8 @@ export const ALL_TOOL_NAMES = [
   'hubspot_get_goal',
   'hubspot_preview_goal_updates',
   'hubspot_batch_update_goals',
+  'hubspot_preview_goal_family_create',
+  'hubspot_create_goal_family',
   // Files (File Manager — separate API surface from CRM)
   'hubspot_search_files',
   'hubspot_get_file',
