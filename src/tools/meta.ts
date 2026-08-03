@@ -31,6 +31,7 @@ const SUPPORTED_OBJECT_TYPES = [
   'line_items',
   'products',
   'quotes',
+  'goal_targets',
 ] as const;
 
 export function registerMetaTools(server: McpServer): void {
@@ -44,7 +45,7 @@ export function registerMetaTools(server: McpServer): void {
       description:
         'List all property definitions for a HubSpot object type ' +
         '(contacts, companies, deals, tasks, calls, meetings, notes, emails, ' +
-        'tickets, line_items, products, quotes). ' +
+        'tickets, line_items, products, quotes, goal_targets). ' +
         'Returns each property\'s name, label, type, options, and metadata. ' +
         'Use this BEFORE create/update tools to confirm property names and types.',
       inputSchema: {
