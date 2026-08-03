@@ -14,7 +14,7 @@ This server exposes **read, create, and update** operations only. It will **neve
 
 ## Tools
 
-61 tools across 13 areas.
+63 tools across 13 areas.
 
 ### Engagements (the unblocking goal)
 
@@ -55,9 +55,9 @@ Files require the `files` scope on your Private App (separate from CRM scopes).
 | `hubspot_describe_object` | List property definitions for any object type. **Run this first** when working with unfamiliar objects — it tells the model exact property names, types, and dropdown options. |
 | `hubspot_list_owners` | Enumerate owners for `hubspot_owner_id` assignment. |
 
-### Goals (4 tools)
+### Goals (6 tools)
 
-HubSpot stores one visible goal as multiple time-bound `goal_target` records. The write workflow is deliberately restricted to target amounts and the edit-notification flag so family-wide metadata cannot be changed on only one slice and fracture the goal in HubSpot's UI.
+HubSpot stores one visible goal as multiple time-bound `goal_target` records. Existing-family updates are deliberately restricted to target amounts and the edit-notification flag so family-wide metadata cannot be changed on only one slice and fracture the goal in HubSpot's UI. New monthly families are created only from a working template target and as exactly 12 contiguous targets.
 
 | Tool | Purpose |
 |---|---|
@@ -65,10 +65,14 @@ HubSpot stores one visible goal as multiple time-bound `goal_target` records. Th
 | `hubspot_get_goal` | Fetch one goal target by internal ID. |
 | `hubspot_preview_goal_updates` | Read current state and return an exact before/after plan with a state-bound approval token. Makes no changes. |
 | `hubspot_batch_update_goals` | Apply up to 100 approved target-amount updates, reject when the final pre-write read differs from the approved preview, require a complete/error-free batch response, and re-read every target to confirm amount and notification state observed at verification time. |
+| `hubspot_preview_goal_family_create` | Read a working target as a template, validate exactly 12 contiguous monthly targets, reject overlapping goals and generated-identifier collisions, and return an exact no-write creation plan with a state-bound approval token. |
+| `hubspot_create_goal_family` | Create the exact approved family, reject stale templates/conflict state/changed plans, require a complete and error-free batch response, and re-read every created target to verify all written properties. |
 
 Concurrency limitation: HubSpot does not expose conditional goal-target writes. The approval token confirms only the state observed by the final pre-write read. State can change after that read, before or during the update, and around the follow-up read. Verification confirms only the state observed by that follow-up read; it cannot eliminate concurrent-write races.
 
-Goals require the `crm.objects.goals.read` Private App scope. Despite the scope name, HubSpot's current Goals API uses it for both reads and writes.
+Creation retry warning: goal-family creation is intentionally marked non-idempotent. A failed, timed-out, or partial batch response can leave some targets created. Never retry blindly. Search by the preview's `familyId`, inspect returned target IDs, and reconcile the portal first. The server never auto-deletes partial results.
+
+Goal search and read operations require `crm.objects.goals.read`. Goal target creation and updates require `crm.objects.goals.write`.
 
 ### Analytics — Sales & Pipeline (5 tools)
 
@@ -134,7 +138,8 @@ Read + write across:
 - Engagements: tasks, calls, meetings, notes (these checkboxes appear in the scope picker)
 - `sales-email-read` (for engagement emails)
 - `crm.lists`, `crm.objects.owners`
-- `crm.objects.goals.read` — required for goal target search/read/create/update endpoints. The MCP exposes read and guarded amount-update operations only.
+- `crm.objects.goals.read` — required for goal target search and read endpoints.
+- `crm.objects.goals.write` — required for guarded existing-family amount updates and guarded template-based monthly-family creation.
 - Read on `crm.schemas.*` for the object types you care about
 - `files` (read + write) — required for the four `hubspot_*_file*` tools. If you skip this scope, the file tools return 403; everything else still works.
 - `forms` (read) — required for `hubspot_list_forms` and `hubspot_get_form_submissions`.
