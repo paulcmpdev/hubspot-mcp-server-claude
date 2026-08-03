@@ -57,7 +57,7 @@ Files require the `files` scope on your Private App (separate from CRM scopes).
 
 ### Goals (6 tools)
 
-HubSpot stores one visible goal as multiple time-bound `goal_target` records. Existing-family updates are deliberately restricted to target amounts and the edit-notification flag so family-wide metadata cannot be changed on only one slice and fracture the goal in HubSpot's UI. New monthly families are created only from a working template target and as exactly 12 contiguous targets.
+HubSpot stores one visible goal as multiple time-bound `goal_target` records. Existing-family updates are deliberately restricted to target amounts and the edit-notification flag so family-wide metadata cannot be changed on only one slice and fracture the goal in HubSpot's UI. New monthly families are created only from a working UI-enriched template target and as exactly 12 contiguous targets. Creation copies an explicit allowlist of assignee, fiscal, forecast, currency, KPI, and HubSpot template-definition properties while excluding audit, source, status, progress, outcome, and runtime-calculation fields.
 
 | Tool | Purpose |
 |---|---|
