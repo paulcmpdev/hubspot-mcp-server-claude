@@ -8,6 +8,7 @@
  */
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { z } from 'zod';
 import {
   registerCreateTool,
   registerGetTool,
@@ -15,6 +16,7 @@ import {
   registerUpdateTool,
   type ObjectToolSpec,
 } from './_factories.js';
+import { readAllAssociations } from './activity-tools.js';
 
 const TASKS: ObjectToolSpec = {
   toolNoun: 'tasks',
@@ -63,6 +65,10 @@ const CALLS: ObjectToolSpec = {
     { property: 'hubspot_owner_id', label: 'owner' },
   ],
   titleProperty: 'hs_call_title',
+  idSchema: z.string().regex(/^[1-9]\d*$/, 'Use an unmodified positive HubSpot ID.'),
+  readAnnotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  associationReader: readAllAssociations,
+  associationTypeSchema: z.enum(['contacts', 'companies', 'deals']),
 };
 
 const MEETINGS: ObjectToolSpec = {
@@ -93,12 +99,16 @@ const NOTES: ObjectToolSpec = {
   singular: 'note',
   plural: 'notes',
   apiPath: 'notes',
-  defaultProperties: ['hs_note_body', 'hs_timestamp', 'hubspot_owner_id'],
+  defaultProperties: ['hs_note_body', 'hs_timestamp', 'hubspot_owner_id', 'hs_attachment_ids'],
   columns: [
     { property: 'hs_note_body', label: 'body' },
     { property: 'hs_timestamp', label: 'when' },
     { property: 'hubspot_owner_id', label: 'owner' },
   ],
+  idSchema: z.string().regex(/^[1-9]\d*$/, 'Use an unmodified positive HubSpot ID.'),
+  readAnnotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+  associationReader: readAllAssociations,
+  associationTypeSchema: z.enum(['contacts', 'companies', 'deals']),
 };
 
 const EMAILS: ObjectToolSpec = {
@@ -134,6 +144,7 @@ export function registerEngagementTools(server: McpServer): void {
 
   // Calls — search + create
   registerSearchTool(server, CALLS);
+  registerGetTool(server, CALLS);
   registerCreateTool(server, CALLS);
 
   // Meetings — search + create
@@ -142,6 +153,7 @@ export function registerEngagementTools(server: McpServer): void {
 
   // Notes — search + create
   registerSearchTool(server, NOTES);
+  registerGetTool(server, NOTES);
   registerCreateTool(server, NOTES);
 
   // Emails — search + get (creating logged engagements has nuances; v2)
