@@ -27,9 +27,11 @@ export function toolResult(text: string, structured?: unknown): CallToolResult {
 }
 
 /** Standard error wrapper — turns thrown errors into MCP isError responses. */
-export function toolError(message: string): CallToolResult {
-  return {
+export function toolError(message: string, structured?: Record<string, unknown>): CallToolResult {
+  const result: CallToolResult = {
     content: [{ type: 'text', text: message }],
     isError: true,
   };
+  if (structured) result.structuredContent = structured;
+  return result;
 }

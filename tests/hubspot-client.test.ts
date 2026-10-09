@@ -89,6 +89,16 @@ describe('hubspotRequest — 429 retry', () => {
     expect(data).toEqual({ ok: true });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
+
+  it('does not retry a 429 when retryOnRateLimit is false', async () => {
+    const fetchImpl = makeFetch([
+      { status: 429, headers: { 'Retry-After': '0', 'content-type': 'text/plain' }, textBody: 'rate limited' },
+      { status: 200, jsonBody: { ok: true } },
+    ]);
+    await expect(hubspotRequest({ path: '/x', retryOnRateLimit: false, fetchImpl: fetchImpl as unknown as typeof fetch }))
+      .rejects.toMatchObject({ status: 429 });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('paginate', () => {

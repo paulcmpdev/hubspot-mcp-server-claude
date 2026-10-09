@@ -8,6 +8,8 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerEngagementTools } from './engagements.js';
+import { registerCommunicationTools } from './communications.js';
+import { registerActivityTools } from './activity-tools.js';
 import { registerContactTools } from './contacts.js';
 import { registerCompanyTools } from './companies.js';
 import { registerDealTools } from './deals.js';
@@ -29,13 +31,21 @@ export const ALL_TOOL_NAMES = [
   'hubspot_create_task',
   'hubspot_update_task',
   'hubspot_search_calls',
+  'hubspot_get_call',
   'hubspot_create_call',
+  'hubspot_update_call',
   'hubspot_search_meetings',
   'hubspot_create_meeting',
   'hubspot_search_notes',
+  'hubspot_get_note',
   'hubspot_create_note',
+  'hubspot_update_note',
+  'hubspot_get_activity_associations',
   'hubspot_search_emails',
   'hubspot_get_email',
+  'hubspot_search_communications',
+  'hubspot_get_communication',
+  'hubspot_create_communication',
   // Contacts
   'hubspot_search_contacts',
   'hubspot_get_contact',
@@ -103,6 +113,8 @@ export const ALL_TOOL_NAMES = [
 
 export function registerAllTools(server: McpServer): void {
   registerEngagementTools(server);
+  registerActivityTools(server);
+  registerCommunicationTools(server);
   registerContactTools(server);
   registerCompanyTools(server);
   registerDealTools(server);

@@ -45,6 +45,13 @@ export interface ObjectToolSpec {
   columns: Array<{ property: string; label?: string }>;
   /** Property name treated as the headline for `formatObject` titles. */
   titleProperty?: string;
+  /** Explicit MCP safety hints for read tools. */
+  readAnnotations?: { readOnlyHint: boolean; destructiveHint: boolean; idempotentHint: boolean; openWorldHint: boolean };
+  /** Optional stricter ID validation for object families that require numeric CRM IDs. */
+  idSchema?: z.ZodTypeAny;
+  /** Fetch complete requested associations when the v3 embedded page may truncate. */
+  associationReader?: (from: string, id: string, to: string) => Promise<unknown[]>;
+  associationTypeSchema?: z.ZodTypeAny;
 }
 
 // ---------------------------------------------------------------------------
@@ -66,6 +73,7 @@ export function registerSearchTool(server: McpServer, spec: ObjectToolSpec): voi
     `hubspot_search_${spec.toolNoun}`,
     {
       title: `Search ${spec.plural}`,
+      annotations: spec.readAnnotations,
       description:
         `Search HubSpot ${spec.plural} via POST /crm/v3/objects/${spec.apiPath}/search. ` +
         `Supports free-text \`query\`, \`filterGroups\` (AND within / OR across), ` +
@@ -115,10 +123,11 @@ export function registerSearchTool(server: McpServer, spec: ObjectToolSpec): voi
 
 export function registerGetTool(server: McpServer, spec: ObjectToolSpec): void {
   const inputSchema = {
-    id: z.string().min(1).describe(`The HubSpot ${spec.singular} ID.`),
+    id: (spec.idSchema ?? z.string().min(1)).describe(`The HubSpot ${spec.singular} ID.`),
     properties: PropertyList,
     associations: z
-      .array(z.string().min(1))
+      .array(spec.associationTypeSchema ?? z.string().min(1))
+      .max(spec.associationReader ? 3 : 20)
       .optional()
       .describe('Associated object types to include (e.g. `["contacts","companies"]`).'),
     response_format: ResponseFormat,
@@ -128,19 +137,26 @@ export function registerGetTool(server: McpServer, spec: ObjectToolSpec): void {
     `hubspot_get_${spec.singular}`,
     {
       title: `Get ${spec.singular} by ID`,
-      description: `Fetch a single HubSpot ${spec.singular} by its ID.`,
+      annotations: spec.readAnnotations,
+      description: `Fetch a single HubSpot ${spec.singular} by its ID.${spec.associationReader ? ' Requested associations are also read in full with bounded pagination and returned in `fullAssociations`.' : ''}`,
       inputSchema,
     },
     async (args) => {
       try {
         const properties = (args.properties ?? spec.defaultProperties).join(',');
-        const obj = await hubspotRequest<HubSpotObject>({
+        const obj = await hubspotRequest<HubSpotObject & { fullAssociations?: Record<string, unknown[]> }>({
           path: `/crm/v3/objects/${spec.apiPath}/${encodeURIComponent(args.id)}`,
           query: {
             properties,
             associations: args.associations?.join(','),
           },
         });
+        if (spec.associationReader && args.associations?.length) {
+          obj.fullAssociations = {};
+          for (const to of new Set(args.associations)) {
+            obj.fullAssociations[to] = await spec.associationReader(spec.apiPath, args.id, to);
+          }
+        }
 
         if (args.response_format === 'json') {
           return toolResult(truncate(JSON.stringify(obj, null, 2)), obj);

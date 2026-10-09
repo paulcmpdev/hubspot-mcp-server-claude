@@ -85,6 +85,8 @@ interface RequestOptions {
   query?: Record<string, string | number | boolean | undefined>;
   body?: unknown;
   attempt?: number;
+  /** Disable automatic retries for non-idempotent creates. */
+  retryOnRateLimit?: boolean;
   /** Optional custom fetch — useful for tests. */
   fetchImpl?: typeof fetch;
 }
@@ -107,7 +109,7 @@ function buildUrl(path: string, query?: RequestOptions['query']): string {
  * Throws {@link HubSpotApiError} for any failure mode.
  */
 export async function hubspotRequest<TData = unknown>(options: RequestOptions): Promise<TData> {
-  const { path, method = 'GET', query, body, attempt = 1, fetchImpl = fetch } = options;
+  const { path, method = 'GET', query, body, attempt = 1, retryOnRateLimit = true, fetchImpl = fetch } = options;
 
   const token = process.env.HUBSPOT_PRIVATE_APP_TOKEN;
   if (!token) {
@@ -139,6 +141,12 @@ export async function hubspotRequest<TData = unknown>(options: RequestOptions): 
 
   // Retry on 429 with exponential backoff, honoring Retry-After when present.
   if (response.status === 429) {
+    if (!retryOnRateLimit) {
+      throw new HubSpotApiError(
+        'HubSpot API rate limit exceeded; automatic retry is disabled for this request.',
+        { status: 429 },
+      );
+    }
     if (attempt > MAX_RETRY_ATTEMPTS) {
       throw new HubSpotApiError(
         'HubSpot API rate limit exceeded after multiple retries. Please try again later.',
